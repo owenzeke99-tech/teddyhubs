@@ -1,0 +1,322 @@
+local CorrectKey = "TeddyHubKeyLaiwowhLapwownneoakLahwowi"
+local KeyLink = "https://link4m.net/sKQhz0Y5"
+local SaveFileName = "TeddyHub_SavedKey.json"
+
+-- Roblox Services
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+-- Platform utilities
+local SetClipboard = setclipboard or syn_clip_set or toclipboard
+local WriteFile = writefile or writeFile
+local ReadFile = readfile or readFile
+local IsFile = isfile or isFile
+
+----------------------------------------------------
+-- SYSTEM: AUTOMATIC 24-HOUR KEY SAVING CHECK
+----------------------------------------------------
+local function IsKeySavedValid()
+    if IsFile and ReadFile and IsFile(SaveFileName) then
+        local success, result = pcall(function()
+            return HttpService:JSONDecode(ReadFile(SaveFileName))
+        end)
+        
+        if success and type(result) == "table" then
+            if result.Key == CorrectKey and result.ExpireTime and os.time() < result.ExpireTime then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function SaveKeyData()
+    if WriteFile then
+        local data = {
+            Key = CorrectKey,
+            ExpireTime = os.time() + 86400 -- 24 Hours
+        }
+        pcall(function()
+            WriteFile(SaveFileName, HttpService:JSONEncode(data))
+        end)
+    end
+end
+
+if IsKeySavedValid() then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))()
+    return
+end
+
+----------------------------------------------------
+-- UI INITIALIZATION
+----------------------------------------------------
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TeddyHubKeyUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 420, 0, 260)
+MainFrame.BackgroundColor3 = Color3.fromRGB(16, 12, 26)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
+
+-- Neon Border
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Parent = MainFrame
+MainStroke.Color = Color3.fromRGB(155, 65, 255)
+MainStroke.Thickness = 2
+MainStroke.Transparency = 0.15
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 0, 0, 22)
+Title.Size = UDim2.new(1, 0, 0, 36)
+Title.Font = Enum.Font.FredokaOne
+Title.Text = "TEDDY HUB"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 32
+
+local TitleGradient = Instance.new("UIGradient")
+TitleGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 120, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 80, 255))
+}
+TitleGradient.Parent = Title
+
+-- Subtitle
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Parent = MainFrame
+SubTitle.BackgroundTransparency = 1
+SubTitle.Position = UDim2.new(0, 0, 0, 60)
+SubTitle.Size = UDim2.new(1, 0, 0, 18)
+SubTitle.Font = Enum.Font.GothamMedium
+SubTitle.Text = "Key Authentication System"
+SubTitle.TextColor3 = Color3.fromRGB(150, 145, 175)
+SubTitle.TextSize = 13
+
+-- TextBox Container (Cắt bớt chữ nếu dài hơn khung)
+local TextBoxContainer = Instance.new("Frame")
+TextBoxContainer.Parent = MainFrame
+TextBoxContainer.Position = UDim2.new(0.08, 0, 0.38, 0)
+TextBoxContainer.Size = UDim2.new(0.84, 0, 0, 46)
+TextBoxContainer.BackgroundColor3 = Color3.fromRGB(26, 20, 38)
+TextBoxContainer.BorderSizePixel = 0
+TextBoxContainer.ClipsDescendants = true -- Sửa lỗi tràn viền ở đây
+
+local ContainerCorner = Instance.new("UICorner")
+ContainerCorner.CornerRadius = UDim.new(0, 10)
+ContainerCorner.Parent = TextBoxContainer
+
+local ContainerStroke = Instance.new("UIStroke")
+ContainerStroke.Parent = TextBoxContainer
+ContainerStroke.Color = Color3.fromRGB(90, 55, 140)
+ContainerStroke.Thickness = 1.2
+
+local TextBox = Instance.new("TextBox")
+TextBox.Parent = TextBoxContainer
+TextBox.BackgroundTransparency = 1
+TextBox.Position = UDim2.new(0.04, 0, 0, 0)
+TextBox.Size = UDim2.new(0.92, 0, 1, 0)
+TextBox.Font = Enum.Font.Gotham
+TextBox.PlaceholderText = "Enter key here..."
+TextBox.PlaceholderColor3 = Color3.fromRGB(115, 110, 140)
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(245, 245, 255)
+TextBox.TextSize = 13
+TextBox.ClearTextOnFocus = false
+TextBox.ClipsDescendants = true
+TextBox.TextXAlignment = Enum.TextXAlignment.Left -- Căn trái để text dài cuộn mượt hơn
+TextBox.TextWrapped = false -- Không xuống dòng gây đè chữ
+
+----------------------------------------------------
+-- BUTTONS (GET KEY & CHECK KEY)
+----------------------------------------------------
+
+-- Get Key Button
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Parent = MainFrame
+GetKeyBtn.Position = UDim2.new(0.08, 0, 0.63, 0)
+GetKeyBtn.Size = UDim2.new(0.40, 0, 0, 42)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(38, 28, 58)
+GetKeyBtn.Font = Enum.Font.GothamBold
+GetKeyBtn.Text = "GET KEY"
+GetKeyBtn.TextColor3 = Color3.fromRGB(200, 160, 255)
+GetKeyBtn.TextSize = 13
+GetKeyBtn.AutoButtonColor = false
+
+local GetKeyCorner = Instance.new("UICorner")
+GetKeyCorner.CornerRadius = UDim.new(0, 9)
+GetKeyCorner.Parent = GetKeyBtn
+
+local GetKeyStroke = Instance.new("UIStroke")
+GetKeyStroke.Parent = GetKeyBtn
+GetKeyStroke.Color = Color3.fromRGB(120, 70, 200)
+GetKeyStroke.Thickness = 1
+
+-- Check Key Button
+local CheckKeyBtn = Instance.new("TextButton")
+CheckKeyBtn.Parent = MainFrame
+CheckKeyBtn.Position = UDim2.new(0.52, 0, 0.63, 0)
+CheckKeyBtn.Size = UDim2.new(0.40, 0, 0, 42)
+CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(130, 50, 225)
+CheckKeyBtn.Font = Enum.Font.GothamBold
+CheckKeyBtn.Text = "CHECK KEY"
+CheckKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckKeyBtn.TextSize = 13
+CheckKeyBtn.AutoButtonColor = false
+
+local CheckKeyCorner = Instance.new("UICorner")
+CheckKeyCorner.CornerRadius = UDim.new(0, 9)
+CheckKeyCorner.Parent = CheckKeyBtn
+
+----------------------------------------------------
+-- MODERN NOTIFICATION BANNER
+----------------------------------------------------
+
+local NotificationFrame = Instance.new("Frame")
+NotificationFrame.Name = "NotificationFrame"
+NotificationFrame.Parent = MainFrame
+NotificationFrame.Position = UDim2.new(0.08, 0, 1, 10)
+NotificationFrame.Size = UDim2.new(0.84, 0, 0, 32)
+NotificationFrame.BackgroundColor3 = Color3.fromRGB(35, 25, 45)
+NotificationFrame.BorderSizePixel = 0
+
+local NotifCorner = Instance.new("UICorner")
+NotifCorner.CornerRadius = UDim.new(0, 8)
+NotifCorner.Parent = NotificationFrame
+
+local NotifStroke = Instance.new("UIStroke")
+NotifStroke.Parent = NotificationFrame
+NotifStroke.Thickness = 1.2
+NotifStroke.Transparency = 0.2
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Parent = NotificationFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Size = UDim2.new(1, 0, 1, 0)
+StatusLabel.Font = Enum.Font.GothamMedium
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusLabel.TextSize = 12
+
+local function ShowNotification(text, state)
+    StatusLabel.Text = text
+    
+    if state == "Error" then
+        NotificationFrame.BackgroundColor3 = Color3.fromRGB(45, 18, 28)
+        NotifStroke.Color = Color3.fromRGB(255, 70, 90)
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 120)
+    elseif state == "Success" then
+        NotificationFrame.BackgroundColor3 = Color3.fromRGB(18, 45, 30)
+        NotifStroke.Color = Color3.fromRGB(70, 255, 140)
+        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 160)
+    elseif state == "Info" then
+        NotificationFrame.BackgroundColor3 = Color3.fromRGB(22, 35, 55)
+        NotifStroke.Color = Color3.fromRGB(80, 160, 255)
+        StatusLabel.TextColor3 = Color3.fromRGB(130, 200, 255)
+    end
+
+    TweenService:Create(NotificationFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.08, 0, 0.83, 0)
+    }):Play()
+
+    if state ~= "Success" then
+        task.spawn(function()
+            task.wait(2.5)
+            TweenService:Create(NotificationFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+                Position = UDim2.new(0.08, 0, 1, 10)
+            }):Play()
+        end)
+    end
+end
+
+----------------------------------------------------
+-- INTERACTION & LOGIC
+----------------------------------------------------
+
+-- Hover Effects
+GetKeyBtn.MouseEnter:Connect(function()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(52, 38, 80)}):Play()
+end)
+GetKeyBtn.MouseLeave:Connect(function()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(38, 28, 58)}):Play()
+end)
+
+CheckKeyBtn.MouseEnter:Connect(function()
+    TweenService:Create(CheckKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 65, 250)}):Play()
+end)
+CheckKeyBtn.MouseLeave:Connect(function()
+    TweenService:Create(CheckKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(130, 50, 225)}):Play()
+end)
+
+-- Shake Animation
+local function ShakeUI()
+    local originalPos = UDim2.new(0.5, 0, 0.5, 0)
+    local tweenInfo = TweenInfo.new(0.04, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    
+    local shakeOffsets = {
+        UDim2.new(0.5, -14, 0.5, 0),
+        UDim2.new(0.5, 14, 0.5, 0),
+        UDim2.new(0.5, -9, 0.5, 0),
+        UDim2.new(0.5, 9, 0.5, 0),
+        UDim2.new(0.5, -4, 0.5, 0),
+        UDim2.new(0.5, 4, 0.5, 0),
+        originalPos
+    }
+
+    task.spawn(function()
+        for _, offset in ipairs(shakeOffsets) do
+            local tween = TweenService:Create(MainFrame, tweenInfo, {Position = offset})
+            tween:Play()
+            tween.Completed:Wait()
+        end
+    end)
+end
+
+-- Get Key Click
+GetKeyBtn.MouseButton1Click:Connect(function()
+    if SetClipboard then
+        SetClipboard(KeyLink)
+        ShowNotification("Key link copied to clipboard!", "Info")
+    else
+        ShowNotification("Failed to copy link automatically!", "Error")
+    end
+end)
+
+-- Check Key Click
+CheckKeyBtn.MouseButton1Click:Connect(function()
+    -- Loại bỏ khoảng trắng thừa ở đầu/cuối key người dùng dán vào
+    local cleanInputKey = string.gsub(TextBox.Text, "^%s*(.-)%s*$", "%1")
+    
+    if cleanInputKey == CorrectKey then
+        ShowNotification("Correct Key! Loading script...", "Success")
+        
+        SaveKeyData()
+        
+        TweenService:Create(MainFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(MainStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+        
+        task.wait(0.6)
+        ScreenGui:Destroy()
+        
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))()
+    else
+        ShowNotification("Invalid Key! Please try again.", "Error")
+        TextBox.Text = ""
+        ShakeUI()
+    end
+end)
